@@ -178,7 +178,6 @@ class Simple9(Code):
         return result
 
     def decodeMany(self, target: Encoding) -> Iterable[int]:
-        result = []
         while target:
             amount = int(target[:4], 2) or 28
             stride = 28 // amount
@@ -186,48 +185,6 @@ class Simple9(Code):
                 number = int(target[4 + i*stride:4 + (i+1)*stride], 2)
                 if number == 0:
                     break
-                result.append(number)
+                yield number
 
             target = target[32:] # Will trim off an extra '28 % amount' versus what the loop saw.
-        return result
-
-
-# TODO: Is this worth it?
-class LLRUN(Code):
-
-    def encode(self, source: int) -> Encoding:
-        pass
-
-    def decode(self, target: Encoding) -> int:
-        pass
-
-
-def test():
-    g = GammaCode()
-    print(g.encode(5))
-    print(g.decode(g.encode(5)))
-
-    d = DeltaCode()
-    print(int("10111", 2))  # 23 in binary has length 5, and hence its delta code should start with the above result.
-    print(d.encode(23))
-    print(d.decode(d.encode(23)))
-
-    o = OmegaCode()
-    print(o.encode(69))  # Omega code should have the exact number you want to encode as the last bits, plus a 0.
-    print(o.decode(o.encode(69)))
-
-    postings = [69, 58, 1, 421, 1]
-    print(o.encodeMany(postings))
-    print(list(o.decodeMany(o.encodeMany(postings))))
-
-    s = Simple9()
-    print(s.encodeMany(postings))
-    print(list(s.decodeMany(s.encodeMany(postings))))
-
-    v = VByte()
-    print(v.encodeMany(postings))
-    print(list(v.decodeMany(v.encodeMany(postings))))
-
-
-if __name__ == "__main__":
-    test()
