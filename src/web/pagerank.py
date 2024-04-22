@@ -48,8 +48,8 @@ class PageRank:
         for source, destinations in edges.items():
             min_src_node_id = min(min_src_node_id,source)
             max_src_node_id = max(max_src_node_id,source)
-            min_dst_node_id = min(min_dst_node_id,min(destinations))
-            max_dst_node_id = max(max_dst_node_id,max(destinations))
+            min_dst_node_id = min(min_dst_node_id,min(destinations) if destinations else +np.inf)
+            max_dst_node_id = max(max_dst_node_id,max(destinations) if destinations else -np.inf)
 
         # Min node is just used for a warning.
         min_node_id = min(min_src_node_id, min_dst_node_id)
@@ -61,7 +61,6 @@ class PageRank:
             max_node_id = max_src_node_id
             for source, destinations in edges.items():
                 edges[source] = list(filter(lambda d: d <= max_node_id, destinations))
-            print(edges)
         else:
             max_node_id = max(max_src_node_id, max_dst_node_id)
 

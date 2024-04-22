@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional, Tuple, Iterable
 
 from src.general import PATH_DATA_OUT
 
@@ -21,16 +21,11 @@ class JACK:
     to crawl Wikipedia without the sidebar (although that's much more difficult in their new layout, smh).
     """
 
-    def __init__(self, do_surroundings: bool=False):
-        self.do_surroundings = do_surroundings
+    def __init__(self, get_href_from_sides: bool=False, truncate_outlinks: bool=True):
+        self.do_surroundings = get_href_from_sides
+        self.do_truncate = truncate_outlinks
 
-    def crawl(self, starting_url: str, max_crawls: int):
-        """
-        Creates the following tables:
-            ID -> URL
-            ID -> linked-to-IDs
-            ID -> <title>
-        """
+    def crawl(self, starting_url: str, max_crawls: int) -> Path:
         known  = {starting_url: 0}
         buffer = [starting_url]
 
@@ -39,58 +34,88 @@ class JACK:
         i = 0
         while buffer and i < max_crawls:
             current_url = buffer.pop(0)
-            parsed_url  = urlparse(current_url)
 
             # Get page
             print("Crawling", current_url)
-            url_to_get = current_url
-            if "wikipedia." in parsed_url.netloc:  # New Wikipedia layout no longer puts the translation pages in a <nav> and that causes messy crawling.
-                url_to_get += "?useskin=vector"
-
-            response = requests.get(url_to_get)
-            if response.status_code == 200 and response.headers.get("Content-Type").startswith("text/html"):
-                soup = bs4.BeautifulSoup(response.text, features="lxml")
-            else:
+            soup = self._getSoup(current_url)
+            if soup is None:
                 continue
 
             # Get anchors with hrefs, then add them to the buffer if not already seen.
-            outlinks = set()
-            for a in soup.find_all("a", href=True):
-                if not self.do_surroundings and len(a.find_parents(["nav", "footer"])) > 0:
-                    continue
-
-                # Sanitise href
-                href = a["href"]
-                parsed_href = urlparse(href)
-                if not parsed_href.netloc:
-                    href = parsed_url.scheme + "://" + parsed_url.netloc + parsed_href.path
-                    parsed_href = urlparse(href)
-                if not parsed_href.scheme:
-                    href = "https://" + parsed_href.netloc + parsed_href.path
-
+            outlinks = self._getUniqueHrefs(current_url, soup)
+            out_ids = []
+            for href in outlinks:
                 if href not in known:
                     buffer.append(href)
                     known[href] = len(known)
                     # print("\t> New link:", href)
-                outlinks.add(known[href])
-
-            outlinks = sorted(outlinks)
+                out_ids.append(known.get(href))
+            out_ids = sorted(out_ids)
 
             # Get payload
+            title, body = self._getContent(soup)
             extracted_data[i] = {
                 "url": current_url,
-                "title": soup.find("title").text,
-                "outlinks": outlinks
+                "title": title,
+                "body": body,
+                "outlinks": out_ids if not self.do_truncate else list(filter(lambda i: i < max_crawls, out_ids))
             }
 
             # Wait a bit before your next request.
             time.sleep(1)
             i += 1
 
-        with open(PATH_DATA_OUT / time.strftime("crawl-%H%M%S.json"), "w", encoding="utf-8") as handle:
+        output = PATH_DATA_OUT / time.strftime("crawl-%H%M%S.json")
+        with open(output, "w", encoding="utf-8") as handle:
             json.dump(extracted_data, handle, indent=4)
+        return output
 
-    def graphFromCrawl(self, crawler_output: Path) -> Dict[int,List[int]]:
+    def _getSoup(self, url: str) -> Optional[bs4.BeautifulSoup]:
+        parsed_url = urlparse(url)
+        if "wikipedia." in parsed_url.netloc:  # New Wikipedia layout no longer puts the translation pages in a <nav> and that causes messy crawling.
+            url += "?useskin=vector"
+
+        response = requests.get(url)
+        if response.status_code == 200 and response.headers.get("Content-Type", "").startswith("text/html"):
+            return bs4.BeautifulSoup(response.text, features="lxml")
+        else:
+            return None
+
+    def _getUniqueHrefs(self, url: str, soup: bs4.BeautifulSoup) -> List[str]:
+        parsed_url = urlparse(url)
+        outlinks = []
+        for a in soup.find_all("a", href=True):
+            if not self.do_surroundings and len(a.find_parents(["nav", "footer"])) > 0:
+                continue
+
+            # Sanitise href
+            href = a["href"]
+            parsed_href = urlparse(href)
+            if not parsed_href.netloc:
+                href = parsed_url.scheme + "://" + parsed_url.netloc + parsed_href.path
+                parsed_href = urlparse(href)
+            if not parsed_href.scheme:
+                href = "https://" + parsed_href.netloc + parsed_href.path
+
+            # Add if not already on the page (we're not using a set, because we want to keep the order).
+            if href not in outlinks:
+                outlinks.append(href)
+
+        return outlinks
+
+    def _getContent(self, soup: bs4.BeautifulSoup) -> Tuple[str, str]:
+        title = soup.find("title").text
+        for tag in soup.find_all("p"):
+            if len(tag.text.split()) > 20:
+                body = tag.text
+                break
+        else:
+            body = ""
+
+        return title, body
+
+    @staticmethod
+    def graphFromCrawl(crawler_output: Path) -> Dict[int,List[int]]:
         with open(crawler_output, "r", encoding="utf-8") as handle:
             data = json.load(handle)
 
@@ -100,8 +125,10 @@ class JACK:
 
         return graph
 
+    @staticmethod
+    def corpusFromCrawl(crawler_output: Path) -> Iterable[str]:
+        with open(crawler_output, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
 
-if __name__ == "__main__":
-    crawler = JACK(do_surroundings=False)
-    # crawler.crawl("https://en.wikipedia.org/wiki/Integral", max_crawls=50)
-    crawler.crawl("https://en.wikipedia.org/wiki/Language", max_crawls=100)
+        for i,id_data in data.items():
+            yield id_data["title"] + "\n" + id_data["body"]
