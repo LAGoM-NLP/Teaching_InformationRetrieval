@@ -1,7 +1,7 @@
 from src.indexing.nonparametric import GammaCode, DeltaCode, OmegaCode, Simple9, VByte
 from src.indexing.parametric import GolombRiceCode
 from src.indexing.contextual import InterpolativeCode
-from src.indexing.huffman import HuffmanCode, LLRUN
+from src.indexing.huffman import HuffmanCode, LLRUN, HuffmanTree
 
 
 def test_postings():
@@ -36,13 +36,24 @@ def test_postings():
 
     ordered_postings = [2,9,12,14,19,21,31,32,33]  # Example from lecture 8, slide 68 (2022). Encoded, it should be "0001001 010 000011111 01101 1000 0110 001 1010 0001 "
     i = InterpolativeCode()
-    print(i.encodeMany(postings))
-    print(list(i.decodeMany(i.encodeMany(postings))))
+    print(i.encodeMany(ordered_postings))
+    print(list(i.decodeMany(i.encodeMany(ordered_postings))))
 
 
 def test_huffman():
     h = HuffmanCode()
     h.trainFromCounts({"c": 12, "d": 13, "a": 5, "b": 9, "e": 16, "f": 45})  # https://www.geeksforgeeks.org/huffman-coding-greedy-algo-3/
+    print(h.tree.getCodebookCanonical())
+    print(sorted(h.tree.getCodebook().items()))  # Note: Geeks4Geeks implements it such that the lower-probability child leans left and hence receives a 0. I give a 0 to the highest-probability child, so all my bits are flipped.
+
+    h2 = HuffmanTree.fromCodebook(h.tree.getCodebook())
+    print(sorted(h2.getCodebook().items()))
+
+    # Note: in a canonical Huffman tree, ordering isn't done based on probability, but on codeword length (which is not
+    #       known when constructing the tree otherwise), meaning that it's now not the heaviest child that receives a 0,
+    #       but rather the shortest child. The shortest subword hence consists entirely of 0.
+    h3 = HuffmanTree.fromCanonicalCodebook(h.tree.getCodebookCanonical())
+    print(sorted(h3.getCodebook().items()))
 
     words = ["a", "f", "b", "e", "d"]
     print(h.encodeMany(words))
@@ -58,4 +69,4 @@ def test_huffman():
 
 if __name__ == "__main__":
     test_huffman()
-    test_postings()
+    # test_postings()

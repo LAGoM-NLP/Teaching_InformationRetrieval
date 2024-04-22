@@ -1,11 +1,13 @@
-from typing import Iterable, Dict
+from typing import Iterable, Dict, Tuple, List
 from collections import Counter
 from dataclasses import dataclass
 import numpy as np
 
 from src.indexing.nonparametric import Code, Encoding, Decoding, ONE, ZERO, toBinary
 
-# TODO: Canonical Huffman!
+
+CanonicalCodebook = Tuple[List[str], List[int]]
+
 
 @dataclass
 class HuffmanTree:
@@ -36,6 +38,56 @@ class HuffmanTree:
             return {k: ZERO + v for k,v in self.left.getCodebook().items()} \
                  | {k: ONE  + v for k,v in self.right.getCodebook().items()}
 
+    def getCodebookCanonical(self) -> CanonicalCodebook:
+        codebook = self.getCodebook()
+        return tuple(zip(*sorted([(k, len(v)) for k,v in codebook.items()])))
+
+    @staticmethod
+    def fromCodebook(codebook: Dict[str,str]) -> "HuffmanTree":
+        if len(codebook) == 1:
+            assert all(len(v) == 0 for v in codebook.values())
+
+            key, codeword = codebook.popitem()
+            codebook[key] = codeword  # Don't want to alter the codebook.
+            return HuffmanTree(
+                weight=0,
+                name=key
+            )
+        else:
+            assert all(len(v) > 0 for v in codebook.values())
+
+            left_codewords  = {k: v[1:] for k,v in codebook.items() if v[0] == ZERO}
+            right_codewords = {k: v[1:] for k,v in codebook.items() if v[0] == ONE}
+
+            return HuffmanTree.fromCodebook(left_codewords) + HuffmanTree.fromCodebook(right_codewords)
+
+    @staticmethod
+    def fromCanonicalCodebook(codebook: CanonicalCodebook) -> "HuffmanTree":
+        lengths = list(zip(codebook[1], codebook[0]))
+        lengths.sort()
+
+        reverse_codebook = dict()
+        while lengths:
+            length, key = lengths.pop(0)
+
+            codeword = ""
+            while len(codeword) < length:
+                if codeword + ZERO not in reverse_codebook:
+                    codeword += ZERO
+                elif codeword + ONE not in reverse_codebook:
+                    codeword += ONE
+                else:  # This is possible: if you have 3 codewords with length 3, you could have 000 and 001, and it should backtrack to flip the first 0 that doesn't create a prefix.
+                    while True:
+                        last_zero = codeword.rfind(ZERO)
+                        codeword = codeword[:last_zero]
+                        if codeword + ONE not in reverse_codebook:
+                            break
+                    codeword += ONE
+
+            reverse_codebook[codeword] = key
+
+        return HuffmanTree.fromCodebook({v:k for k,v in reverse_codebook.items()})
+
 
 class HuffmanCode(Code):
 
@@ -53,7 +105,7 @@ class HuffmanCode(Code):
             # Pop worst nodes and combine them
             worst_node        = nodes.pop()
             second_worst_node = nodes.pop()
-            combination = worst_node + second_worst_node
+            combination = second_worst_node + worst_node
 
             # Insert
             i = 0
