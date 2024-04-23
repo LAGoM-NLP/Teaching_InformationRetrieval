@@ -91,8 +91,9 @@ class HuffmanTree:
 
 class HuffmanCode(Code):
 
-    def __init__(self):
+    def __init__(self, heaviest_child_gets_zero: bool=True):
         self.tree: HuffmanTree = None
+        self.heaviest_leftward = heaviest_child_gets_zero
 
     def train(self, corpus: Iterable[str]):
         self.trainFromCounts(Counter(corpus))
@@ -105,7 +106,7 @@ class HuffmanCode(Code):
             # Pop worst nodes and combine them
             worst_node        = nodes.pop()
             second_worst_node = nodes.pop()
-            combination = second_worst_node + worst_node
+            combination = second_worst_node + worst_node if self.heaviest_leftward else worst_node + second_worst_node
 
             # Insert
             i = 0

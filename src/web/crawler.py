@@ -75,11 +75,14 @@ class JACK:
         if "wikipedia." in parsed_url.netloc:  # New Wikipedia layout no longer puts the translation pages in a <nav> and that causes messy crawling.
             url += "?useskin=vector"
 
-        response = requests.get(url)
-        if response.status_code == 200 and response.headers.get("Content-Type", "").startswith("text/html"):
-            return bs4.BeautifulSoup(response.text, features="lxml")
-        else:
-            return None
+        try:
+            response = requests.get(url)
+            if response.status_code == 200 and response.headers.get("Content-Type", "").startswith("text/html"):
+                return bs4.BeautifulSoup(response.text, features="lxml")
+        except:
+            pass
+
+        return None
 
     def _getUniqueHrefs(self, url: str, soup: bs4.BeautifulSoup) -> List[str]:
         parsed_url = urlparse(url)

@@ -10,15 +10,17 @@ from tktkt.preparation.instances import TraditionalPretokeniser, Preprocessor, P
 
 from rank_bm25 import BM25Okapi
 
+SimpleNormaliser = MapperSequence([
+    Stripper(),
+    Lowercaser(),
+    FilterCharacters(PunctuationPretokeniser.buildPunctuationString())
+])
+
 class OkapiRetrieval:
 
     def __init__(self, corpus: Iterable[str]):
         self.pretokeniser = Preprocessor(
-            uninvertible_mapping=MapperSequence([
-                Stripper(),
-                Lowercaser(),
-                FilterCharacters(PunctuationPretokeniser.buildPunctuationString())
-            ]),
+            uninvertible_mapping=SimpleNormaliser,
             splitter=TraditionalPretokeniser()
         )
         self.lemmatizer = WordNetLemmatizer()
