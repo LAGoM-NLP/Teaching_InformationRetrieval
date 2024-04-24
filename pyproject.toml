@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "irse"
+version = "2024.04.01"
+dependencies = [
+    "fiject @ git+https://github.com/bauwenst/fiject",
+    "tktkt  @ git+https://github.com/bauwenst/tktkt"
+]
+requires-python = ">= 3.9"
+authors = [
+  {name = "Thomas Bauwens", email = "thomas.bauwens@kuleuven.be"}
+]
+maintainers = [
+  {name = "Thomas Bauwens", email = "thomas.bauwens@kuleuven.be"}
+]
+description = "Backend code for the 'Information Retrieval & Search Engines' course exercises."
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["information retrieval"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]

@@ -95,7 +95,7 @@ class PageRank:
 
 
 if __name__ == "__main__":
-    from src.general import PATH_DATA_IN
+    from irse.general import PATH_DATA_IN
     # test = ROOT / "data" / "web" / "test1.tsv"
     test = PATH_DATA_IN / "web" / "wikitalk.tsv"
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     ###
     # edges = readEdges(test)
 
-    from src.web.crawler import PATH_DATA_OUT, JACK
+    from irse.web.crawler import PATH_DATA_OUT, JACK
     crawler = JACK()
     edges = crawler.graphFromCrawl(PATH_DATA_OUT / "crawl-180417.json")
     ###

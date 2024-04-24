@@ -1,5 +1,5 @@
 from typing import Iterable, List
-from src.indexing.nonparametric import Code, Encoding, Decoding, GammaCode, toBinary
+from irse.indexing.nonparametric import Code, Encoding, Decoding, GammaCode, toBinary
 
 
 class InterpolativeCode(Code):

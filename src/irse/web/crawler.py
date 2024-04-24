@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Iterable
 
-from src.general import PATH_DATA_OUT
+from irse.general import PATH_DATA_OUT
 
 import json
 import requests

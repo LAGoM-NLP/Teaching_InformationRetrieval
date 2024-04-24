@@ -1,7 +1,7 @@
-from src.indexing.nonparametric import GammaCode, DeltaCode, OmegaCode, Simple9, VByte
-from src.indexing.parametric import GolombRiceCode
-from src.indexing.contextual import InterpolativeCode
-from src.indexing.huffman import HuffmanCode, LLRUN, HuffmanTree
+from irse.indexing.nonparametric import GammaCode, DeltaCode, OmegaCode, Simple9, VByte
+from irse.indexing.parametric import GolombRiceCode
+from irse.indexing.contextual import InterpolativeCode
+from irse.indexing.huffman import HuffmanCode, LLRUN, HuffmanTree
 
 
 def test_postings():

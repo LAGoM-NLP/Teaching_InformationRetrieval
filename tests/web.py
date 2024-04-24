@@ -1,8 +1,8 @@
 import numpy.random as npr
 
-from src.web.crawler import *
-from src.web.pagerank import PageRank
-from src.retrieval.bm25 import OkapiRetrieval
+from irse.web.crawler import *
+from irse.web.pagerank import PageRank
+from irse.retrieval.bm25 import OkapiRetrieval
 
 
 def exampleCrawl():

@@ -1,4 +1,4 @@
-from src.indexing.nonparametric import Code, UnaryCode, toBinary, Encoding, Decoding
+from irse.indexing.nonparametric import Code, UnaryCode, toBinary, Encoding, Decoding
 
 
 class GolombRiceCode(Code):

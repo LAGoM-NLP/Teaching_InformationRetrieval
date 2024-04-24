@@ -3,7 +3,7 @@ from collections import Counter
 from dataclasses import dataclass
 import numpy as np
 
-from src.indexing.nonparametric import Code, Encoding, Decoding, ONE, ZERO, toBinary
+from irse.indexing.nonparametric import Code, Encoding, Decoding, ONE, ZERO, toBinary
 
 
 CanonicalCodebook = Tuple[List[str], List[int]]
