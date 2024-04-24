@@ -95,6 +95,8 @@ class HuffmanCode(Code):
         self.tree: HuffmanTree = None
         self.heaviest_leftward = heaviest_child_gets_zero
 
+        self.codebook.cache = None
+
     def train(self, corpus: Iterable[str]):
         self.trainFromCounts(Counter(corpus))
 
@@ -115,9 +117,13 @@ class HuffmanCode(Code):
             nodes.insert(i, combination)
 
         self.tree = nodes[0]
+        self.codebook_cache = self.tree.getCodebook()
 
     def encode(self, source: str) -> Encoding:
-        return self.tree.getCodebook().get(source)
+        if source not in self.codebook_cache:
+            print("Warning: You are trying to encode a character with no Huffman codeword associated to it. It will be ignored.")
+
+        return self.codebook_cache.get(source, "")
 
     def decode(self, target: Encoding) -> Decoding:
         current_node = self.tree

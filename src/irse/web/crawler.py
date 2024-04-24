@@ -65,6 +65,9 @@ class JACK:
             time.sleep(1)
             i += 1
 
+        if i < max_crawls:
+            print("Stopped crawling prematurely because the link buffer was emptied.")
+
         print("Saving results...")
         output = PATH_DATA_OUT / time.strftime("crawl-%H%M%S.json")
         with open(output, "w", encoding="utf-8") as handle:
