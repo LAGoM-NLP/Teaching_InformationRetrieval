@@ -6,6 +6,7 @@ from irse.general import PATH_DATA_OUT
 import json
 import requests
 import bs4
+import lxml
 import time
 from urllib.parse import urlparse
 
@@ -81,12 +82,19 @@ class JACK:
 
         try:
             response = requests.get(url)
-            if response.status_code == 200 and response.headers.get("Content-Type", "").startswith("text/html"):
-                return bs4.BeautifulSoup(response.text, features="lxml")
         except:
-            pass
+            print("\tURL couldn't be requested.")
+            return None
 
-        return None
+        if response.status_code == 200 and response.headers.get("Content-Type", "").startswith("text/html"):
+            try:
+                return bs4.BeautifulSoup(response.text, features="lxml")
+            except:
+                print("\tFailed to make soup :(")
+                return None
+        else:
+            print(f"\tURL either isn't HTML or has bad status code ({response.status_code}).")
+            return None
 
     def _getUniqueHrefs(self, url: str, soup: bs4.BeautifulSoup) -> List[str]:
         parsed_url = urlparse(url)
