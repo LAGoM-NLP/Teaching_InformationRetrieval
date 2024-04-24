@@ -95,7 +95,7 @@ class HuffmanCode(Code):
         self.tree: HuffmanTree = None
         self.heaviest_leftward = heaviest_child_gets_zero
 
-        self.codebook.cache = None
+        self.codebook_cache = None
 
     def train(self, corpus: Iterable[str]):
         self.trainFromCounts(Counter(corpus))
