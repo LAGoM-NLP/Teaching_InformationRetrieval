@@ -36,7 +36,7 @@ class JACK:
             current_url = buffer.pop(0)
 
             # Get page
-            print("Crawling", current_url)
+            print(f"Crawling URL {i+1}:", current_url)
             soup = self._getSoup(current_url)
             if soup is None:
                 continue
@@ -65,6 +65,7 @@ class JACK:
             time.sleep(1)
             i += 1
 
+        print("Saving results...")
         output = PATH_DATA_OUT / time.strftime("crawl-%H%M%S.json")
         with open(output, "w", encoding="utf-8") as handle:
             json.dump(extracted_data, handle, indent=4)

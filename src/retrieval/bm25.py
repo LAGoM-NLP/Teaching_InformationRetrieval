@@ -3,7 +3,7 @@ from typing import List, Iterable, Tuple
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-nltk.download("wordnet")
+nltk.download("wordnet", quiet=True)
 
 from tktkt.preparation.mappers import Lowercaser, FilterCharacters, MapperSequence, Stripper
 from tktkt.preparation.instances import TraditionalPretokeniser, Preprocessor, PunctuationPretokeniser
