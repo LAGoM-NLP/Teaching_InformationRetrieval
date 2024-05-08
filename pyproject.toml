@@ -5,10 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "irse"
 version = "2024.04.01"
-dependencies = [
-    "fiject @ git+https://github.com/bauwenst/fiject",
-    "tktkt  @ git+https://github.com/bauwenst/tktkt"
-]
+dependencies = []
 requires-python = ">= 3.9"
 authors = [
   {name = "Thomas Bauwens", email = "thomas.bauwens@kuleuven.be"}
@@ -23,4 +20,10 @@ keywords = ["information retrieval"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+github = [
+    "fiject         @ git+https://github.com/bauwenst/fiject",
+    "tktkt[github]  @ git+https://github.com/bauwenst/TkTkT"
 ]
