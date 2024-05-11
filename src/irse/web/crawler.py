@@ -119,7 +119,12 @@ class JACK:
         return outlinks
 
     def _getContent(self, soup: bs4.BeautifulSoup) -> Tuple[str, str]:
-        title = soup.find("title").text
+        tag = soup.find("title")
+        if tag is not None:
+            title = tag.text
+        else:
+            title = ""
+
         for tag in soup.find_all("p"):
             if len(tag.text.split()) > 20:
                 body = tag.text
