@@ -1,4 +1,4 @@
- from typing import List, Iterable, Tuple
+from typing import List, Iterable, Tuple
 
 import nltk
 from nltk.corpus import stopwords
