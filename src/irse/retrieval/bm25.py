@@ -2,26 +2,30 @@ from typing import List, Iterable, Tuple
 
 import nltk
 from nltk.corpus import stopwords
-from nltk import word_tokenize
 from nltk.stem import WordNetLemmatizer
 nltk.download("wordnet", quiet=True)
 nltk.download("stopwords", quiet=True)
 
-# from tktkt.preparation.mappers import Lowercaser, FilterCharacters, MapperSequence, Stripper
-# from tktkt.preparation.instances import TraditionalPretokeniser, Preprocessor, PunctuationPretokeniser
+from tktkt.preparation.mappers import Lowercaser, FilterCharacters, MapperSequence, Stripper
+from tktkt.preparation.instances import TraditionalPretokeniser, Preprocessor, PunctuationPretokeniser
 
 from rank_bm25 import BM25Okapi
 
-# SimpleNormaliser = MapperSequence([
-#     Stripper(),
-#     Lowercaser(),
-#     FilterCharacters(PunctuationPretokeniser.buildPunctuationString())
-# ])
+
+SimpleNormaliser = MapperSequence([
+    Stripper(),
+    Lowercaser(),
+    FilterCharacters(PunctuationPretokeniser.buildPunctuationString())
+])
+
 
 class OkapiRetrieval:
 
     def __init__(self, corpus: Iterable[str]):
-        self.pretokeniser = word_tokenize()
+        self.pretokeniser = Preprocessor(
+            uninvertible_mapping=SimpleNormaliser,
+            splitter=TraditionalPretokeniser()
+        )
         self.lemmatizer = WordNetLemmatizer()
         self.stopwords  = set(stopwords.words("english"))
 
