@@ -76,12 +76,20 @@ class JACK:
         return output
 
     def _getSoup(self, url: str) -> Optional[bs4.BeautifulSoup]:
+        headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,...',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Referer': 'https://httpbin.dev',
+                'Connection': 'keep-alive'
+            } # because you get a 403 without it - this is just a standard header
         parsed_url = urlparse(url)
         if "wikipedia." in parsed_url.netloc:  # New Wikipedia layout no longer puts the translation pages in a <nav> and that causes messy crawling.
             url += "?useskin=vector"
 
         try:
-            response = requests.get(url)
+            response = requests.get(url, headers=headers)
         except:
             print("\tURL couldn't be requested.")
             return None
